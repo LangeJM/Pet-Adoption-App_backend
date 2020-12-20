@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const Pet = new Schema(
@@ -11,8 +12,8 @@ const Pet = new Schema(
         color: { type: String, required: true },
         hypoallergenic: { type: Boolean, required: true },
         dietaryRestrictions: { type: String, required: true },
-        fosteredBy: { type: String, required },
-        savedBy: { type: [String], required}
+        fosteredBy: { type: String, required:false },
+        savedBy: { type: [String], required:false}
     },
     { timestamps: true },
 )

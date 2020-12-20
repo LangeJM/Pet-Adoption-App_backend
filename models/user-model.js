@@ -8,7 +8,7 @@ const User = new Schema(
         type: { type: String, required: true }, // type in mongodb syntax will resolve to 'string' that is why we have to wrap the  
         email: { type: String, required: true, match: /\S+@\S+\.\S+/ },
         password: { type: String, required: true},
-        phone: { type: Number},
+        phone: { type: Number, required: true},
         savedPets: { type: [String], required: false },
         fosteredPets: { type: [String], required: false },
     },
