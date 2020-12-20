@@ -13,7 +13,10 @@ createUser = (req, res) => { //Maybe rename to signupUser?
     const user = new User(body)
 
     if (!user) {
-        return res.status(400).json({ success: false, error: err })
+        return res.status(400).json({
+            success: false,
+            error: err
+        })
     }
 
     user
@@ -35,8 +38,8 @@ createUser = (req, res) => { //Maybe rename to signupUser?
 
 updateUser = async (req, res) => {
     const body = req.body
-
-    if (!body) {
+    
+    if (!body || Object.keys(body).length === 0) {
         return res.status(400).json({
             success: false,
             error: 'No user information provided',
@@ -52,7 +55,7 @@ updateUser = async (req, res) => {
                 message: 'User not found!',
             })
         }
-        // hwne using switch case instead, it will update the db but throw an error with message 'User not updated!' 
+        // when using switch/case instead, it will update the db but throw an error with message 'User not updated!' 
         if ('firstName' in req.body) user.firstName = body.firstName
         if ('lastName' in req.body) user.lastName = body.lastName
         if ('type' in req.body) user.type = body.type
