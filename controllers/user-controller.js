@@ -43,20 +43,23 @@ updateUser = async (req, res) => {
         })
     }
 
-    User.findOne({ _id: req.params.id }, (err, user) => {
+    /* Below provides a more flexible solution to update one or several specific fields instead of the whole entry. 
+    Inspired by https://stackoverflow.com/questions/30602057/how-to-update-some-but-not-all-fields-in-mongoose */
+    User.findOneAndUpdate({ _id: req.params.id }, { $set: req.body }, { useFindAndModify: false }, (err, user) => { 
         if (err) {
             return res.status(404).json({
                 err,
                 message: 'User not found!',
             })
         }
-        user.firstName = body.firstName
-        user.lastName = body.lastName
-        user.type = body.type
-        user.email = body.email
-        user.password = body.password
-        user.phone = body.phone
-        
+        // hwne using switch case instead, it will update the db but throw an error with message 'User not updated!' 
+        if ('firstName' in req.body) user.firstName = body.firstName
+        if ('lastName' in req.body) user.lastName = body.lastName
+        if ('type' in req.body) user.type = body.type
+        if ('email' in req.body) user.email = body.email
+        if ('password' in req.body) user.password = body.password
+        if ('phone' in req.body) user.phone = body.phone
+
         user
             .save()
             .then(() => {
@@ -100,7 +103,6 @@ loginUser = async (req, res) => {
             })
         }
     })
-
 }
 
 getUserById = async (req, res) => {
