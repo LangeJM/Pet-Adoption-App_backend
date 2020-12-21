@@ -10,10 +10,11 @@ const Pet = new Schema(
         height: { type: Number, required: true },
         weight: { type: Number, required: true },
         color: { type: String, required: true },
-        hypoallergenic: { type: Boolean, required: true },
+        hypoallergenic: { type: Boolean, required: false },
         dietaryRestrictions: { type: String, required: true },
         fosteredBy: { type: String, required:false },
-        savedBy: { type: [String], required:false}
+        savedBy: { type: [String], required: false },
+        image: { type: [String], required:false}
     },
     { timestamps: true },
 )

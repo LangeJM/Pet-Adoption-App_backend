@@ -1,5 +1,18 @@
 
+
 const Pet = require('../models/pet-model') 
+
+// const multer = require('multer');
+// const storage = multer.diskStorage({
+//   destination: '../public/petImages',
+//     filename: (req, file, cb) => {
+//         const filename = `${file.fieldname}-${Date.now()}-${file.originalname}`;
+//         cb(null, filename);
+//     },
+// });
+
+// const upload = multer({ storage });
+
 
 createPet = (req, res) => {
     const body = req.body;
@@ -90,10 +103,12 @@ updatePet = async (req, res) => {
 getPetById = async(req, res) => {
     await Pet.findOne({ _id: req.params.id }, (err, pet) => {
         if (err) {
-            return res.status(400).json({
+            return res
+                .status(400)
+                .json({
                 success: false,
                 error: err
-            })
+                })
         }
 
         if (!pet) {
@@ -104,10 +119,12 @@ getPetById = async(req, res) => {
                     error: "Pet not found"
                 })
         }
-        return res.status(200).json({
-            success: true,
-            data:pet
-        })
+        return res
+            .status(200)
+            .json({
+                success: true,
+                data:pet
+            })
         
     }).catch(err => console.log(err))
 }
@@ -130,7 +147,7 @@ getPets = async (req, res) => {
         }
         return res.status(200).json({
             success: true,
-            data: users
+            data: pets
         })
     }).catch(err => console.log(err))
 } 
@@ -138,24 +155,30 @@ getPets = async (req, res) => {
 deletePet = async(req, res) => {
     await Pet.findOneAndDelete({ _id: req.params.id }, (err, pet) => {
         if (err) {
-            return res.status(400).json({
-                success: false,
-                error: err
-            })
+            return res
+                .status(400)
+                .json({
+                    success: false,
+                    error: err
+                })
         }
         if (!pet) {
-            return res.status(400).json({
-                success: false,
-                error: "Pet not found"
-            })
+            return res
+                .status(400)
+                .json({
+                    success: false,
+                    error: "Pet not found"
+                })
         }
-        return status(200).json({
-            success: true,
-            data: pet
-        })
+        return res
+            .status(200)
+            .json({
+                success: true,
+                // message: `Pet with id ${req.params.id} deleted from database!`,
+                data: pet
+            })
     }).catch(err => console.log(err))
 }
-
 
 module.exports = {
     createPet,
