@@ -1,30 +1,32 @@
-
-
-const Pet = require('../models/pet-model') 
-
-// const multer = require('multer');
-// const storage = multer.diskStorage({
-//   destination: '../public/petImages',
-//     filename: (req, file, cb) => {
-//         const filename = `${file.fieldname}-${Date.now()}-${file.originalname}`;
-//         cb(null, filename);
-//     },
-// });
-
-// const upload = multer({ storage });
-
+const Pet = require('../models/pet-model')
 
 createPet = (req, res) => {
     const body = req.body;
+    const file = req.file;
+    console.log(body, file)
 
-    if (!body) {
+    if (!body && !file) {
         return res.status(400).json({
             success: false,
             error: "No pet information provided!"
         })
     }
 
-    const pet = new Pet(body)
+    const pet = new Pet({
+        name: req.body.name,
+        status: req.body.status,
+        type: req.body.type,
+        breed: req.body.breed,
+        height: req.body.height,
+        weight: req.body.weight,
+        color: req.body.color,
+        hypoallergenic: req.body.hypoallergenic,
+        dietaryRestrictions: req.body.dietaryRestrictions,
+        fostered: req.body.fostered,
+        savedBy: req.body.savedBy,
+        image: `${req.protocol}://${req.get('host')}/public/petImages/${req.file.filename}`,
+        imageName: file.originalname
+    })
 
     if (!pet) {
         return res.status(400).json({
@@ -34,7 +36,7 @@ createPet = (req, res) => {
     }
 
     pet
-        .save()
+        .save()        
         .then(() => {
             return res.status(201).json({
                 success: true,
@@ -69,7 +71,7 @@ updatePet = async (req, res) => {
                 message: "Pet not found!",
             })
         }
-        // when using switch/case instead, it will update the db but throw an error with message 'User not updated!' 
+        // when using switch/case instead, it will update the db but throw an error with message 'Pet not updated!' 
         if ('name' in req.body) pet.name = body.name
         if ('status' in req.body) pet.status = body.status
         if ('type' in req.body) pet.type = body.type
@@ -88,13 +90,13 @@ updatePet = async (req, res) => {
                 return res.status(200).json({
                     success: true,
                     id: pet._id,
-                    message: "User updated!",
+                    message: "Pet updated!",
                 })
             })
             .catch(error => {
                 return res.status(404).json({
                     error,
-                    message: "User not updated!",
+                    message: "Pet not updated!",
                 })
             })
     })
@@ -115,7 +117,7 @@ getPetById = async(req, res) => {
             return res
                 .status(404)
                 .json({
-                    sucess: false,
+                    success: false,
                     error: "Pet not found"
                 })
         }
@@ -181,9 +183,11 @@ deletePet = async(req, res) => {
 }
 
 module.exports = {
+    // createPet : createPet,
     createPet,
     updatePet,
     getPetById,
     getPets,
     deletePet,
+
 }

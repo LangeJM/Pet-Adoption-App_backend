@@ -10,6 +10,7 @@ const apiPort = 5000
 
 app.use(cors())
 app.use(express.json())
+app.use('/public', express.static('public'));
 
 db.on('error', console.error.bind(console.log, 'MongoDB connection error:')) // Is there a better implementation than bind? Arrow function? 
 
