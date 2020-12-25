@@ -3,7 +3,9 @@ const Pet = require('../models/pet-model')
 createPet = (req, res) => {
     const body = req.body;
     const file = req.file;
-    console.log(body, file)
+    // console.log('body, file') Delete!!!
+    // console.log(body, file)
+    // console.log(file.location)
 
     if (!body && !file) {
         return res.status(400).json({
@@ -24,7 +26,7 @@ createPet = (req, res) => {
         dietaryRestrictions: req.body.dietaryRestrictions,
         fostered: req.body.fostered,
         savedBy: req.body.savedBy,
-        image: `${req.protocol}://${req.get('host')}/public/petImages/${req.file.filename}`,
+        image: file.location,
         imageName: file.originalname
     })
 
@@ -144,7 +146,7 @@ getPets = async (req, res) => {
                 .status(404)
                 .json({
                     success: true,
-                    data: users
+                    data: pets
                 })
         }
         return res.status(200).json({
