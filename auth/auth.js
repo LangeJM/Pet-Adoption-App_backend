@@ -1,3 +1,4 @@
+// Doesn't do anything at this point
 const jwt = require('jsonwebtoken')
 const { id } = require('../db/db')
 
