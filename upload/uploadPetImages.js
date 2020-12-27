@@ -4,7 +4,7 @@ const multer = require('multer')
 const multerS3 = require('multer-s3')
 path = require('path')
 
-AWS.config.loadFromPath(`${__dirname}/../config/aws-config.json`);
+// AWS.config.loadFromPath(`${__dirname}/../config/aws-config.json`); // THis is now stored in the .env and automatically recognized by AWS
 
 const S3 = new AWS.S3();
 

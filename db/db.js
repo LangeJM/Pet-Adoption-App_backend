@@ -1,25 +1,14 @@
 const mongoose = require('mongoose');
 
 mongoose
-    .connect('***REMOVED***', { useNewUrlParser: true, useUnifiedTopology: true })
+    .connect(process.env.mongoDBAuthString, { useNewUrlParser: true, useUnifiedTopology: true })
     .catch(error => {
         console.error('Connection error', error.message);
-    });
-
-// mongoose
-//     .connect('mongodb://127.0.0.1:27017/I-Pets', { useNewUrlParser: true, useUnifiedTopology: true })
-//     .catch(error => {
-//         console.error('Connection error', error.message);
-//     });
+    }); // Need to add closure of connection???
 
 const db = mongoose.connection;
 
 module.exports = db  
-
-
-
-// const connectionString = `***REMOVED***<password>@cluster0.jsqud.mongodb.net/<dbname>?retryWrites=true&w=majority`
-
 
 /*
 const MongoClient = require('mongodb').MongoClient;
