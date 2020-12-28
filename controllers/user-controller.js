@@ -1,7 +1,20 @@
-const User = require('../models/user-model')
+// const auth = require("../auth/auth");
+const bcrypt = require("bcrypt");
+const { User, validate } = require('../models/user-model');
 
-createUser = (req, res) => { //Maybe rename to signupUser?
-    const body = req.body
+createUser = async (req, res) => { 
+    const body = await req.body;
+    console.log(body)
+// Returns a validate is not a function from Joi. There is currently a problem with this...Compare with user-model.js
+    // const error = await validate(body);
+    // if (error) {
+    //     console.log('WHOOOOOO', error)
+    //     return res.status(400).json({
+    //         success: false,
+    //         // error: error.details[0].message
+    //         error: error
+    //     })
+    // }
 
     if (!body) {
         return res.status(400).json({
@@ -10,28 +23,32 @@ createUser = (req, res) => { //Maybe rename to signupUser?
         })
     }
 
-    const user = new User(body)
-
-    if (!user) {
+    const emailExists = await User.findOne({ email: body.email });
+    if (emailExists) {
         return res.status(400).json({
             success: false,
-            error: err
+            error: 'An account with this email address already exists. \nPlease choose a different email address or try to log in instead.'
         })
     }
 
-    user
+    const user = new User(body);
+    
+    user.password = await bcrypt.hash(user.password, 10)
+      
+    user //Need to resolve this block
         .save()
         .then(() => {
-            return res.status(201).json({
-                success: true,
-                id: user._id,
-                message: "User created!",
-            })
+            const token = user.generateAuthToken();
+            return res.status(202).header("x-auth-token", token).send({
+                _id: user._id,
+                name: `${user.firstName} ${user.lastName}`,
+                email: user.email
+            });
         })
         .catch(error => {
             return res.status(400).json({
                 error,
-                message: "User not created!",
+                message: "User not created!"
             })
         })
 }
@@ -81,30 +98,46 @@ updateUser = async (req, res) => {
     })
 }
 
-loginUser = async (req, res) => {
-    const body = req.body
+currentUser = async (req, res) => {
+    const user = await User.findById(req.user._id).isSelected("-password");
+    res.send(user);
+}
 
-    if (!body) {
-        return res.status(400).json({
+loginUser = async (req, res) => {
+    const body = await req.body;
+    console.log(body)
+    console.log(body.email)
+
+    if (!body || body === false || body === '') {
+        return res.status(401).json({
             success: false,
-            error: 'No user information provided',
+            error: "No login information provided.",
         })
     }
 
-    User.findOne({ _id: req.params.id }, (err, user) => {
-        if (err) {
+    User.findOne({ "email": body.email }, (err, user) => {
+                
+        if (!user) {
             return res.status(404).json({
-                err,
-                message: 'User not found!',
+                success:false,
+                error: `This email address is not registered. \n\nPlease try again with a different email address or sign up with a new account.`,
             })
         }
-        if (user.email === body.email && user.password === body.password) {
-            return res.status(200).json({
-                success: true,
-                id: user._id,
-                message: 'User authenticated!',
-            })
-        }
+        
+        bcrypt.compare(body.password, user.password)
+            .then(function (result) {
+                if (result) {
+                    return res.status(200).json({
+                        success: true,
+                        name: `${user.firstName} ${user.lastName}`,
+                        message: 'User authenticated!',
+                    })
+                } else return res.status(401).json({
+                        success: false,
+                        name: `${user.firstName} ${user.lastName}`,
+                        message: 'Password incorrect. Please try again!',
+                    })
+            }).catch(err => console.log(err))
     })
 }
 
@@ -174,4 +207,5 @@ module.exports = {
     getUserById,
     getUserPetsById,
     getUsers,
+    currentUser
 }

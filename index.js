@@ -1,4 +1,5 @@
 require('dotenv').config()
+const config = require("config");
 const express = require('express')
 const cors = require('cors')
 
@@ -8,6 +9,11 @@ const petRouter = require('./routes/pet-router')
 
 const app = express()
 const apiPort = 5000
+
+if (!config.get("myprivatekey")) {
+  console.error("FATAL ERROR: myprivatekey is not defined.");
+  process.exit(1);
+}
 
 app.use(cors())
 app.use(express.json())
