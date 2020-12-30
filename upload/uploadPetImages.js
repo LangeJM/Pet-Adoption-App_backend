@@ -22,18 +22,16 @@ const upload = multer({
       cb(null, `${file.fieldname}-${Date.now()}-${file.originalname}`)
     }
   }),
-  // SET DEFAULT FILE SIZE UPLOAD LIMIT
-  limits: { fileSize: 1024 * 1024 * 50 }, // 50MB
-  // FILTER OPTIONS LIKE VALIDATING FILE EXTENSION
-  fileFilter: function (req, file, cb) {
+  
+  limits: { fileSize: 1024 * 1024 * 5 }, // IN Bytes equals to 5MB
+  
+  fileFilter: function (req, file, fileTypeVerification) {
     const filetypes = /jpeg|jpg|png|gif/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = filetypes.test(file.mimetype);
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb("Only images of type jpeg|jpg|png are allowed!");
-    }
+    
+    if (mimetype && extname) return fileTypeVerification(null, true);
+    else fileTypeVerification("Only images of type jpeg|jpg|png are allowed!");
   }
 });
 

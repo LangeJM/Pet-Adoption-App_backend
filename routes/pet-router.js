@@ -16,6 +16,7 @@ router.put('/pet/:id', PetController.updatePet)
 router.get('/pet/:id', PetController.getPetById)
 router.get('/pets', PetController.getPets)
 router.delete('/pet/:id', PetController.deletePet)
+router.get('/petsSample', PetController.getPetsSample)
 // return to org, adopt, save pet APIs will be part of update pe3ts API
 
 module.exports = router

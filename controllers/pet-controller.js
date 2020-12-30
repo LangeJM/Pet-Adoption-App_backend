@@ -158,6 +158,29 @@ getPets = async (req, res) => {
     }).catch(err => console.log(err))
 } 
 
+getPetsSample = async (req, res) => {
+    await Pet.aggregate([{$sample: {size: 4}}], (err, pets) => {
+        if (err) {
+            return res.status(400).json({
+                success: false,
+                error: err
+            })
+        }
+        if (!pets.length) {
+            return res
+                .status(404)
+                .json({
+                    success: true,
+                    data: pets
+                })
+        }
+        return res.status(200).json({
+            success: true,
+            data: pets
+        })
+    }).catch(err => console.log(err))
+} 
+
 deletePet = async(req, res) => {
     await Pet.findOneAndDelete({ _id: req.params.id }, (err, pet) => {
         if (err) {
@@ -193,5 +216,5 @@ module.exports = {
     getPetById,
     getPets,
     deletePet,
-
+    getPetsSample
 }
