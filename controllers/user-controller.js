@@ -1,20 +1,14 @@
 // const auth = require("../auth/auth");
 const bcrypt = require("bcrypt");
-const { User, validate } = require('../models/user-model');
+const { v4: uuidv4 } = require('uuid');
+const { User } = require('../models/user-model');
+const { Session } = require('../models/session-model');
+const mongoose = require('mongoose')
+
 
 createUser = async (req, res) => { 
     const body = await req.body;
     console.log(body)
-// Returns a validate is not a function from Joi. There is currently a problem with this...Compare with user-model.js
-    // const error = await validate(body);
-    // if (error) {
-    //     console.log('WHOOOOOO', error)
-    //     return res.status(400).json({
-    //         success: false,
-    //         // error: error.details[0].message
-    //         error: error
-    //     })
-    // }
 
     if (!body) {
         return res.status(400).json({
@@ -35,22 +29,105 @@ createUser = async (req, res) => {
     
     user.password = await bcrypt.hash(user.password, 10)
       
-    user //Need to resolve this block
-        .save()
-        .then(() => {
-            const token = user.generateAuthToken();
-            return res.status(202).header("x-auth-token", token).send({
-                _id: user._id,
-                name: `${user.firstName} ${user.lastName}`,
-                email: user.email
+    await user.save(async function (err, user) {
+        if (err) return res.status(400).json({
+                err,
+                message: "Something didn't work. Please try again later!"
             });
+        const session = new Session()
+        const sessionId = uuidv4();
+        session._id = sessionId;
+        session.userId = user._id
+    
+        await session.save((err, session) => {
+            if (err) return res.status(400).json({
+                err,
+                message: "Something didn't work. Please try again later!"
+            });
+            return res.status(202).send({
+                sessionId: session._id,
+                name: `${user.firstName} ${user.lastName}`,
+                // email: user.email,
+            });
+        });
+    });
+}
+
+loginUser = async (req, res) => {
+    const body = await req.body;
+    console.log(body)
+    console.log(body.email)
+
+    if (!body || body === false || body === '') {
+        return res.status(401).json({
+            success: false,
+            error: "No login information provided.",
         })
-        .catch(error => {
-            return res.status(400).json({
-                error,
-                message: "User not created!"
+    }
+
+    await User.findOne({ "email": body.email }, async (err, user) => {
+                
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: `This email address is not registered. \n\nPlease try again with a different email address or sign up with a new account.`,
+            })
+        }
+        
+        await bcrypt.compare(body.password, user.password, async (err, result) => {
+            if (result) {
+                const session = new Session()
+                const sessionId = uuidv4();
+                session._id = sessionId;
+                // session.userId = mongoose.Types.ObjectId(user._id)
+                session.userId = user._id
+
+                await session.save((err, session) => {
+                    if (err) {
+                        return res.status(400)
+                            .json({
+                                err,
+                                message: "Something didn't work. Please try again later!"
+                            });
+                    }
+                    return res.status(202).json({
+                        sessionId: session._id,
+                        name: `${user.firstName} ${user.lastName}`,
+                    })
+                })
+            }
+            else return res.status(401).json({
+                success: false,
+                err: 'Password incorrect. Please try again!',
             })
         })
+            
+    })
+}
+
+currentUser = async (req, res) => {
+    const body = await req.body
+    console.log("Here comes the req body:", body)
+    try {
+        const session = await Session.findById(body.sessionId)
+        console.log("Is this doing something????", session.userId)
+        const user = await User.findById(session.userId)
+        if (user) {
+            console.log("This is the response:", user)
+            res.send(user)
+        } else {
+            res.status(500).json({
+                success: false,
+                err: 'Something went wrong while attempting to log you in. Please try again later!',
+            })
+        }   
+    } catch (err) {
+        res.status(440).json({
+            success: false,
+            message: "Your session has expired. Please log in again." 
+        })
+    }
+     
 }
 
 updateUser = async (req, res) => {
@@ -95,49 +172,6 @@ updateUser = async (req, res) => {
                     message: "User not updated!",
                 })
             })
-    })
-}
-
-currentUser = async (req, res) => {
-    const user = await User.findById(req.user._id).isSelected("-password");
-    res.send(user);
-}
-
-loginUser = async (req, res) => {
-    const body = await req.body;
-    console.log(body)
-    console.log(body.email)
-
-    if (!body || body === false || body === '') {
-        return res.status(401).json({
-            success: false,
-            error: "No login information provided.",
-        })
-    }
-
-    User.findOne({ "email": body.email }, (err, user) => {
-                
-        if (!user) {
-            return res.status(404).json({
-                success:false,
-                error: `This email address is not registered. \n\nPlease try again with a different email address or sign up with a new account.`,
-            })
-        }
-        
-        bcrypt.compare(body.password, user.password)
-            .then(function (result) {
-                if (result) {
-                    return res.status(200).json({
-                        success: true,
-                        name: `${user.firstName} ${user.lastName}`,
-                        message: 'User authenticated!',
-                    })
-                } else return res.status(401).json({
-                        success: false,
-                        name: `${user.firstName} ${user.lastName}`,
-                        message: 'Password incorrect. Please try again!',
-                    })
-            }).catch(err => console.log(err))
     })
 }
 
