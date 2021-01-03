@@ -12,11 +12,15 @@ No sure where this has to go exactly with this setup
 */
 
 router.post('/pet', upload.single('image'), PetController.createPet)
+router.get('/petsSample', PetController.getPetsSample)
+router.get('/pets', PetController.getPets)
+router.get('/petsSearch', PetController.getPetsBySearch)
+
+
 router.put('/pet/:id', PetController.updatePet)
 router.get('/pet/:id', PetController.getPetById)
-router.get('/pets', PetController.getPets)
 router.delete('/pet/:id', PetController.deletePet)
-router.get('/petsSample', PetController.getPetsSample)
+
 // return to org, adopt, save pet APIs will be part of update pe3ts API
 
 module.exports = router

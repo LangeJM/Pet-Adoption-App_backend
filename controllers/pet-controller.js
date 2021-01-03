@@ -56,6 +56,79 @@ createPet = (req, res) => {
         }) 
 }
 
+getPetsSample = async (req, res) => {
+    await Pet.aggregate([{$sample: {size: 4}}], (err, pets) => {
+        if (err) {
+            return res.status(400).json({
+                success: false,
+                error: err
+            })
+        }
+        if (!pets.length) {
+            return res
+                .status(404)
+                .json({
+                    success: true,
+                    data: pets
+                })
+        }
+        return res.status(200).json({
+            success: true,
+            data: pets
+        })
+    }).catch(err => console.log(err))
+} 
+
+getPets = async (req, res) => {
+    await Pet.find({}, (err, pets) => {
+        if (err) {
+            return res.status(400).json({
+                success: false,
+                error: err
+            })
+        }
+        if (!pets.length) {
+            return res
+                .status(404)
+                .json({
+                    success: true,
+                    data: pets
+                })
+        }
+        return res.status(200).json({
+            success: true,
+            data: pets
+        })
+    }).catch(err => console.log(err))
+} 
+
+
+getPetsBySearch = async (req, res) => {
+    const query = req.query
+    if (query) await Pet.find(query, (err, pets) => {
+        if (err) {
+            return res.status(400).json({
+                success: false,
+                error: err
+            })
+        }
+        if (!pets.length) {
+            return res
+                .status(404)
+                .json({
+                    success: false,
+                    data: "There is no match for your search."
+                })
+        }
+        return res.status(200).json({
+            success: true,
+            data: pets
+        })
+    }).catch(err => console.log(err))
+}
+
+
+
 updatePet = async (req, res) => {
     const body = req.body
 
@@ -135,52 +208,6 @@ getPetById = async(req, res) => {
     }).catch(err => console.log(err))
 }
 
-getPets = async (req, res) => {
-    await Pet.find({}, (err, pets) => {
-        if (err) {
-            return res.status(400).json({
-                success: false,
-                error: err
-            })
-        }
-        if (!pets.length) {
-            return res
-                .status(404)
-                .json({
-                    success: true,
-                    data: pets
-                })
-        }
-        return res.status(200).json({
-            success: true,
-            data: pets
-        })
-    }).catch(err => console.log(err))
-} 
-
-getPetsSample = async (req, res) => {
-    await Pet.aggregate([{$sample: {size: 4}}], (err, pets) => {
-        if (err) {
-            return res.status(400).json({
-                success: false,
-                error: err
-            })
-        }
-        if (!pets.length) {
-            return res
-                .status(404)
-                .json({
-                    success: true,
-                    data: pets
-                })
-        }
-        return res.status(200).json({
-            success: true,
-            data: pets
-        })
-    }).catch(err => console.log(err))
-} 
-
 deletePet = async(req, res) => {
     await Pet.findOneAndDelete({ _id: req.params.id }, (err, pet) => {
         if (err) {
@@ -216,5 +243,6 @@ module.exports = {
     getPetById,
     getPets,
     deletePet,
-    getPetsSample
+    getPetsSample,
+    getPetsBySearch
 }
