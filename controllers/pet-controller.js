@@ -131,6 +131,8 @@ getPetsBySearch = async (req, res) => {
 
 updatePet = async (req, res) => {
     const body = req.body
+    console.log("Coming through with updatePet: ", body)
+    console.log("Coming through with updatePet: ", req.query)
 
     if (!body || Object.keys(body).length === 0) {
         return res.status(400).json({
@@ -141,7 +143,7 @@ updatePet = async (req, res) => {
 
     /* Below provides a more flexible solution to update one or several specific fields instead of the whole entry. 
     Inspired by https://stackoverflow.com/questions/30602057/how-to-update-some-but-not-all-fields-in-mongoose */
-    Pet.findOneAndUpdate({ _id: req.params.id }, { $set: req.body }, { useFindAndModify: false }, (err, user) => { 
+    Pet.findOneAndUpdate({ _id: req.query.id }, { $set: req.body }, { useFindAndModify: false }, (err, pet) => { 
         if (err) {
             return res.status(404).json({
                 err,
