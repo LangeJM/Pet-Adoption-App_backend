@@ -4,8 +4,6 @@ const multer = require('multer')
 const multerS3 = require('multer-s3')
 path = require('path')
 
-// AWS.config.loadFromPath(`${__dirname}/../config/aws-config.json`); // THis is now stored in the .env and automatically recognized by AWS
-
 const S3 = new AWS.S3();
 
 const upload = multer({
@@ -23,7 +21,7 @@ const upload = multer({
     }
   }),
   
-  limits: { fileSize: 1024 * 1024 * 5 }, // IN Bytes equals to 5MB
+  limits: { fileSize: 1024 * 1024 * 5 }, // In bytes, equals to 5MB
   
   fileFilter: function (req, file, fileTypeVerification) {
     const filetypes = /jpeg|jpg|png|gif/;
@@ -34,6 +32,5 @@ const upload = multer({
     else fileTypeVerification("Only images of type jpeg|jpg|png are allowed!");
   }
 });
-
 
 module.exports = upload  

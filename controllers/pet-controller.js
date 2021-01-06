@@ -102,7 +102,6 @@ getPets = async (req, res) => {
     }).catch(err => console.log(err))
 } 
 
-
 getPetsBySearch = async (req, res) => {
     const query = req.query
     if (query) await Pet.find(query, (err, pets) => {
@@ -126,8 +125,6 @@ getPetsBySearch = async (req, res) => {
         })
     }).catch(err => console.log(err))
 }
-
-
 
 updatePet = async (req, res) => {
     const body = req.body
@@ -210,6 +207,40 @@ getPetById = async(req, res) => {
     }).catch(err => console.log(err))
 }
 
+getUserPets = async (req, res) => {
+    // Inspired by discussion here https://stackoverflow.com/a/57637077/12754665
+    await Pet.find({ '_id': { $in: req.body } }, (err, pet) => {
+        console.log("REQ BODY USER PETS: ", req.body)
+        if (err) {
+            return res
+                .status(400)
+                .json({
+                    success: false,
+                    error: err
+                })
+        }
+
+        if (!pet) {
+            return res
+                .status(404)
+                .json({
+                    success: false,
+                    error: "Pet not found"
+                })
+        }
+        return res
+            .status(200)
+            .json({
+                success: true,
+                data: pet
+            })
+        
+    }).catch(err => console.log(err))
+}
+
+
+
+
 deletePet = async(req, res) => {
     await Pet.findOneAndDelete({ _id: req.params.id }, (err, pet) => {
         if (err) {
@@ -239,12 +270,13 @@ deletePet = async(req, res) => {
 }
 
 module.exports = {
-    // createPet : createPet,
     createPet,
     updatePet,
     getPetById,
     getPets,
-    deletePet,
     getPetsSample,
-    getPetsBySearch
+    getPetsBySearch,
+    getUserPets,
+
+    deletePet, // Not sure if to implement that or not 
 }

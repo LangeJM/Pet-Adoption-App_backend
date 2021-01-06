@@ -1,14 +1,10 @@
-// const auth = require("../auth/auth");
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require('uuid');
 const { User } = require('../models/user-model');
 const { Session } = require('../models/session-model');
-const mongoose = require('mongoose')
-
 
 createUser = async (req, res) => { 
     const body = await req.body;
-    console.log(body)
 
     if (!body) {
         return res.status(400).json({
@@ -55,8 +51,6 @@ createUser = async (req, res) => {
 
 loginUser = async (req, res) => {
     const body = await req.body;
-    console.log(body)
-    console.log(body.email)
 
     if (!body || body === false || body === '') {
         return res.status(401).json({
@@ -107,13 +101,10 @@ loginUser = async (req, res) => {
 
 currentUser = async (req, res) => {
     const body = await req.body
-    console.log("Here comes the req body:", body)
     try {
         const session = await Session.findById(body.sessionId)
-        console.log("Is this doing something????", session.userId)
         const user = await User.findById(session.userId)
         if (user) {
-            console.log("This is the response:", user)
             res.send(user)
         } else {
             res.status(500).json({
@@ -142,7 +133,7 @@ updateUser = async (req, res) => {
 
     /* Below provides a more flexible solution to update one or several specific fields instead of the whole entry. 
     Inspired by https://stackoverflow.com/questions/30602057/how-to-update-some-but-not-all-fields-in-mongoose */
-    User.findOneAndUpdate({ _id: req.params.id }, { $set: req.body }, { useFindAndModify: false }, (err, user) => { 
+    User.findOneAndUpdate({ _id: req.body.id }, { $set: req.body }, { useFindAndModify: false }, (err, user) => { 
         if (err) {
             return res.status(404).json({
                 err,
@@ -152,11 +143,56 @@ updateUser = async (req, res) => {
         // when using switch/case instead, it will update the db but throw an error with message 'User not updated!' 
         if ('firstName' in req.body) user.firstName = body.firstName
         if ('lastName' in req.body) user.lastName = body.lastName
-        if ('type' in req.body) user.type = body.type
         if ('email' in req.body) user.email = body.email
         if ('password' in req.body) user.password = body.password
         if ('phone' in req.body) user.phone = body.phone
+        if ('bio' in req.body) user.bio = body.bio
+        if ('savedPets' in req.body) user.savedPets = body.savedPets
+        if ('fosteredPets' in req.body) user.fosteredPets = body.fosteredPets
 
+        user
+            .save()
+            .then(() => {
+                return res.status(200).json({
+                    success: true,
+                    id: user._id,
+                    message: "User updated!",
+                })
+            })
+            .catch(error => {
+                return res.status(404).json({
+                    error,
+                    message: "User not updated!",
+                })
+            })
+    })
+}
+
+updateUserPets = async (req, res) => {
+    const body = req.body
+    console.log(body)
+
+    if (!body || Object.keys(body).length === 0) {
+        return res.status(400).json({
+            success: false,
+            error: "No user information provided",
+        })
+    }
+    let keyVar;
+    if ('savedPets' in req.body) keyVar = "savedPets"
+    if ('fosteredPets' in req.body) keyVar = "fosteredPets"
+    console.log(keyVar)
+    
+    /* Below provides a more flexible solution to update one or several specific fields instead of the whole entry.
+    Inspired by https://stackoverflow.com/questions/30602057/how-to-update-some-but-not-all-fields-in-mongoose */
+    User.findOneAndUpdate({ _id: req.body.id }, { $set: req.body }, {new: true}, (err, user) => { 
+        if (err) {
+            return res.status(404).json({
+                err,
+                message: "User not found!",
+            })
+        }
+        console.log(user)
         user
             .save()
             .then(() => {
@@ -237,6 +273,7 @@ getUsers = async (req, res) => {
 module.exports = {
     createUser,
     updateUser,
+    updateUserPets,
     loginUser,
     getUserById,
     getUserPetsById,

@@ -17,10 +17,6 @@ app.use('/public', express.static('public'));
 
 db.on('error', console.error.bind(console.log, 'MongoDB connection error:')) // Is there a better implementation than bind? Arrow function? 
 
-// app.get('/', (req, res) => {
-//     res.send('Hello World!')
-// });
-
 app.use('/api', userRouter)
 app.use('/api', petRouter)
 
