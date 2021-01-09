@@ -92,7 +92,7 @@ loginUser = async (req, res) => {
             }
             else return res.status(401).json({
                 success: false,
-                err: 'Password incorrect. Please try again!',
+                error: 'Password incorrect. Please try again!',
             })
         })
             
